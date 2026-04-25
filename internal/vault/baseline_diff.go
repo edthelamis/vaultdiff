@@ -29,6 +29,11 @@ func (r *BaselineDiffResult) Summary() string {
 		r.Environment, r.Path, added, removed, changed)
 }
 
+// HasDrift reports whether any differences were detected against the baseline.
+func (r *BaselineDiffResult) HasDrift() bool {
+	return len(r.Changes) > 0
+}
+
 // DiffAgainstBaseline compares current secret data against a saved baseline.
 func DiffAgainstBaseline(b *Baseline, current map[string]string) (*BaselineDiffResult, error) {
 	if b == nil {
