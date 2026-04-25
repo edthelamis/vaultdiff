@@ -41,7 +41,7 @@ func exportCSV(log *AuditLog, w io.Writer) error {
 	for _, e := range log.Entries {
 		ts := e.Timestamp.Format("2006-01-02T15:04:05Z")
 		if len(e.Changes) == 0 {
-			_, err = fmt.Fprintf(w, "%s,%s,%s,%d,%d,,,, \n",
+			_, err = fmt.Fprintf(w, "%s,%s,%s,%d,%d,,,,\n",
 				ts, e.Environment, e.Path, e.VersionA, e.VersionB)
 			if err != nil {
 				return err
@@ -57,8 +57,8 @@ func exportCSV(log *AuditLog, w io.Writer) error {
 				e.VersionB,
 				c.Key,
 				string(c.Status),
-				strings.ReplaceAll(c.OldValue, ",", ";"),
-				strings.ReplaceAll(c.NewValue, ",", ";"),
+				escapeCSV(c.OldValue),
+				escapeCSV(c.NewValue),
 			)
 			if _, err = fmt.Fprint(w, line); err != nil {
 				return err
@@ -66,4 +66,14 @@ func exportCSV(log *AuditLog, w io.Writer) error {
 		}
 	}
 	return nil
+}
+
+// escapeCSV replaces commas with semicolons and wraps values containing
+// newlines or double-quotes in double-quotes, escaping internal quotes.
+func escapeCSV(value string) string {
+	value = strings.ReplaceAll(value, ",", ";")
+	if strings.ContainsAny(value, "\"\n") {
+		value = `"` + strings.ReplaceAll(value, `"`, `""`) + `"`
+	}
+	return value
 }
