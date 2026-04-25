@@ -63,3 +63,17 @@ func NewBaseline(environment, path string, data map[string]string) *Baseline {
 		Data:        copy,
 	}
 }
+
+// Age returns the duration elapsed since the baseline was created.
+func (b *Baseline) Age() time.Duration {
+	return time.Since(b.CreatedAt)
+}
+
+// Keys returns a sorted-order-independent slice of all secret keys in the baseline.
+func (b *Baseline) Keys() []string {
+	keys := make([]string, 0, len(b.Data))
+	for k := range b.Data {
+		keys = append(keys, k)
+	}
+	return keys
+}
