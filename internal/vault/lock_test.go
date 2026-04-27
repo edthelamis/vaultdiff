@@ -70,6 +70,20 @@ func TestLockIndex_IsLocked_WithActiveTTL(t *testing.T) {
 	}
 }
 
+func TestLockIndex_IsLocked_ExpiredTTL(t *testing.T) {
+	li := NewLockIndex()
+	// Insert an entry whose TTL has already elapsed.
+	li.Locks["secret/expired"] = LockEntry{
+		Path:      "secret/expired",
+		Owner:     "alice",
+		LockedAt:  time.Now().Add(-2 * time.Hour),
+		ExpiresAt: time.Now().Add(-1 * time.Hour),
+	}
+	if li.IsLocked("secret/expired") {
+		t.Error("expected expired lock to be treated as unlocked")
+	}
+}
+
 func TestSaveAndLoadLockIndex_RoundTrip(t *testing.T) {
 	li := NewLockIndex()
 	_ = li.Acquire("secret/x", "carol", "testing", 0)
