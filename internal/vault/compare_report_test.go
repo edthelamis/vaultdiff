@@ -84,3 +84,16 @@ func TestCompareReport_Write_OnlyInB(t *testing.T) {
 		t.Error("expected key with + prefix")
 	}
 }
+
+func TestCompareReport_Write_EmptyResult(t *testing.T) {
+	res := CompareResult{}
+	rep := NewCompareReport("dev", "prod", res)
+	var buf bytes.Buffer
+	if err := rep.Write(&buf); err != nil {
+		t.Fatalf("unexpected error writing empty report: %v", err)
+	}
+	out := buf.String()
+	if !strings.Contains(out, "dev vs prod") {
+		t.Errorf("expected header even for empty result, got: %s", out)
+	}
+}
